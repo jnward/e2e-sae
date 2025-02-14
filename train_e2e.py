@@ -87,9 +87,11 @@ from tqdm import tqdm
 
 features_to_train = [768]
 k=67
+ctx_len=128
 num_optimizer_steps = 24_000 * 2
-virtual_batch_size = 16
-actual_batch_size = 1
+# virtual_batch_size = 8192 // ctx_len
+actual_batch_size = 128 // ctx_len
+virtual_batch_size = actual_batch_size
 accumulation_steps = virtual_batch_size // actual_batch_size
 total_forward_passes = num_optimizer_steps * accumulation_steps
 alpha = 1/32
@@ -156,10 +158,9 @@ for optimizer_step in pbar:
 
                 loss.backward()
 
-            if acc_step == 0 and optimizer_step % 10 == 0:
-                l0, fvu = compute_metrics(acts, features, reconstruction)
+            if acc_step == 0:
+                l0, fvu = compute_metrics(acts.reshape(-1, 768), features.reshape(-1, sae.n_features), reconstruction.reshape(-1, 768))
                 explained_variance = 1 - fvu
-
                 run_data = {
                         "main_loss": main_loss.item() * accumulation_steps,
                         "loss": loss.item() * accumulation_steps,
