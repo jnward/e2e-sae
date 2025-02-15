@@ -3,11 +3,11 @@ import torch
 from transformer_lens import HookedTransformer
 
 
-def get_gpt(size: str = "small", device: str = "cuda") -> HookedTransformer:
+def get_gpt(size: str = "small", device: str = "cuda", dtype: torch.dtype = torch.float32) -> HookedTransformer:
     return HookedTransformer.from_pretrained(
         f"gpt2-{size}",
         device=device,
-        dtype=torch.bfloat16,
+        dtype=dtype,
     )
 
 def partial_forward(
